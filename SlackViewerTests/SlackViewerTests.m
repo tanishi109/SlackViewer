@@ -27,12 +27,12 @@
 - (BOOL)findSubviewInView:(UIView *)view matching:(BOOL(^)(UIView *view))test
 {
   if (test(view)) {
-    return YES;
+return YES;
   }
   for (UIView *subview in [view subviews]) {
-    if ([self findSubviewInView:subview matching:test]) {
-      return YES;
-    }
+if ([self findSubviewInView:subview matching:test]) {
+  return YES;
+}
   }
   return NO;
 }
@@ -44,20 +44,20 @@
   NSString *redboxError = nil;
 
   while ([date timeIntervalSinceNow] > 0 && !foundElement && !redboxError) {
-    [[NSRunLoop mainRunLoop] runMode:NSDefaultRunLoopMode beforeDate:[NSDate dateWithTimeIntervalSinceNow:0.1]];
-    [[NSRunLoop mainRunLoop] runMode:NSRunLoopCommonModes beforeDate:[NSDate dateWithTimeIntervalSinceNow:0.1]];
+[[NSRunLoop mainRunLoop] runMode:NSDefaultRunLoopMode beforeDate:[NSDate dateWithTimeIntervalSinceNow:0.1]];
+[[NSRunLoop mainRunLoop] runMode:NSRunLoopCommonModes beforeDate:[NSDate dateWithTimeIntervalSinceNow:0.1]];
 
-    redboxError = [[RCTRedBox sharedInstance] currentErrorMessage];
+redboxError = [[RCTRedBox sharedInstance] currentErrorMessage];
 
-    foundElement = [self findSubviewInView:vc.view matching:^BOOL(UIView *view) {
-      if ([view respondsToSelector:@selector(attributedText)]) {
-        NSString *text = [(id)view attributedText].string;
-        if ([text isEqualToString:TEXT_TO_LOOK_FOR]) {
-          return YES;
-        }
-      }
-      return NO;
-    }];
+foundElement = [self findSubviewInView:vc.view matching:^BOOL(UIView *view) {
+  if ([view respondsToSelector:@selector(attributedText)]) {
+NSString *text = [(id)view attributedText].string;
+if ([text isEqualToString:TEXT_TO_LOOK_FOR]) {
+  return YES;
+}
+  }
+  return NO;
+}];
   }
 
   XCTAssertNil(redboxError, @"RedBox error: %@", redboxError);
