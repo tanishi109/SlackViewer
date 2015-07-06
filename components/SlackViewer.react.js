@@ -1,24 +1,33 @@
+var React = require('react-native');
+var token = "xoxp-2435567268-2435567274-6653820643-5ee449";
+
 var SlackViewer = React.createClass({
+  getInitialState: function() {
+    fetch('https://slack.com/api/channels.list?token='+token)
+      .then((response) => response.text())
+      .then((responseText) => {
+        console.log(responseText);
+      })
+      .catch((error) => {
+        console.warn(error);
+      });
+
+    return (
+      "hoge"
+    );
+  },
+
   render: function() {
     return (
-      <View style={styles.container}>
-        <Text style={styles.welcome}>
+      <View>
+        <Text>
           This is very first app made by react!!
-        </Text>
-        <Text style={styles.welcome}>
-          Welcome to React Native!
-        </Text>
-        <Text style={styles.instructions}>
-          To get started, edit index.ios.js
-        </Text>
-        <Text style={styles.instructions}>
-          Press Cmd+R to reload,{'\n'}
-          Cmd+D or shake for dev menu
         </Text>
       </View>
     );
   }
 });
+
 
 // var FilterableProductTable = React.createClass({
 //     getInitialState: function() {
@@ -52,3 +61,4 @@ var SlackViewer = React.createClass({
 //         );
 //     }
 // });
+
