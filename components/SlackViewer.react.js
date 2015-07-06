@@ -1,3 +1,8 @@
+
+// https://github.com/inkenkun/react-native-todo/blob/master/App/components/TodoReact.react.js
+// module exports したらいけるやん！！！！
+
+
 var React = require('react-native');
 var token = "xoxp-2435567268-2435567274-6653820643-5ee449";
 
