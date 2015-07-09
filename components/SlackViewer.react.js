@@ -7,25 +7,48 @@ var {
 } = React;
 
 var SlackViewer = React.createClass({
+
   getInitialState: function () {
     return {
-      channels: "a",
+      channels: ["empty"],
     };
   },
+
   componentDidMount: function() {
-    this.fetchData();
+    this.fetchChannels();
+    this.fetchHistory(this.state.channels[0]);
   },
-  fetchData: function() {
+
+  fetchChannels: function() {
     fetch('https://slack.com/api/channels.list?token='+token)
       .then((response) => response.text())
       .then((responseText) => {
         var values = JSON.parse(responseText);
-        var channelNames = [];
+        var channelIds = [];
+
         values.channels.forEach(function(channel) {
-          channelNames.push(channel.name);
+          channelIds.push(channel.id);
         });
+        console.log(channelIds);
         this.setState({
-          channels: channelNames,
+          channels: channelIds,
+          loaded: true,
+        });
+      })
+      .catch((error) => {
+        console.warn(error);
+      })
+      .done();
+  },
+
+  fetchHistory: function(channelId) {
+    fetch('https://slack.com/api/channels.history?token='+token+'&channel='+channelId)
+      .then((response) => response.text())
+      .then((responseText) => {
+        var values = JSON.parse(responseText);
+        console.log(values);
+        this.setState({
+          channels: values,
           loaded: true,
         });
       })
@@ -43,12 +66,17 @@ var SlackViewer = React.createClass({
     }
     return (
       <View>
-        <Text>
-          This is very first app made by react!! {this.state.channels}
-        </Text>
+        {this.state.channels.map(function(elm, i){
+          return (
+            <Text>
+              {elm}
+            </Text>
+          );
+        })}
       </View>
     );
   }
+
 });
 
 module.exports = SlackViewer;
