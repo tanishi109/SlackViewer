@@ -15,11 +15,17 @@ var SlackViewer = React.createClass({
   },
 
   componentDidMount: function() {
-    this.fetchChannels();
-    this.fetchHistory(this.state.channels[0]);
+    var p = new Promise((resolve, reject) => {
+      console.log("promise ", this);
+      this.fetchChannels(resolve);
+    });
+    p.then(() => {
+      console.log("then ", this);
+      this.fetchHistory(this.state.channels[0]);
+    })
   },
 
-  fetchChannels: function() {
+  fetchChannels: function(resolve) {
     fetch('https://slack.com/api/channels.list?token='+token)
       .then((response) => response.text())
       .then((responseText) => {
@@ -38,7 +44,9 @@ var SlackViewer = React.createClass({
       .catch((error) => {
         console.warn(error);
       })
-      .done();
+      .done(() => {
+        resolve();
+      });
   },
 
   fetchHistory: function(channelId) {
