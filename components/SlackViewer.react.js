@@ -15,66 +15,81 @@ var SlackViewer = React.createClass({
   },
 
   componentDidMount: function() {
-    var p = new Promise((resolve, reject) => {
-      console.log("promise ", this);
-      this.fetchChannels(resolve);
-    });
-    p.then(() => {
-      console.log("then ", this);
-      this.fetchHistory(this.state.channels[0]);
-    })
+    this.fetchChannels()
+      .then(() => {
+        return new Promise((resolve, reject) => {
+          var historyPromises = this.state.channels.map(this.fetchHistory);
+          console.log(historyPromises);
+          Promise.all(historyPromises)
+            .done(() => {
+              resolve();
+            })
+        });
+      })
+      .then(() => {
+        console.log("then 2 !!", this);
+      })
   },
 
-  fetchChannels: function(resolve) {
-    fetch('https://slack.com/api/channels.list?token='+token)
-      .then((response) => response.text())
-      .then((responseText) => {
-        var values = JSON.parse(responseText);
-        var channelIds = [];
+  fetchChannels: function() {
+    return new Promise((resolve, reject) => {
+      fetch('https://slack.com/api/channels.list?token='+token)
+        .then((response) => response.text())
 
-        values.channels.forEach(function(channel) {
-          channelIds.push(channel.id);
+        .then((responseText) => {
+          var values = JSON.parse(responseText);
+          var channelIds = [];
+          values.channels.forEach((channel) => {
+            channelIds.push(channel.id);
+          });
+          this.setState({
+            channels: channelIds,
+            loaded: true,
+          });
+        })
+
+        .catch((error) => {
+          console.warn(error);
+        })
+        .done(() => {
+          resolve();
         });
-        console.log(channelIds);
-        this.setState({
-          channels: channelIds,
-          loaded: true,
-        });
-      })
-      .catch((error) => {
-        console.warn(error);
-      })
-      .done(() => {
-        resolve();
-      });
+    });
   },
 
   fetchHistory: function(channelId) {
-    fetch('https://slack.com/api/channels.history?token='+token+'&channel='+channelId)
-      .then((response) => response.text())
-      .then((responseText) => {
-        var values = JSON.parse(responseText);
-        console.log(values);
-        this.setState({
-          channels: values,
-          loaded: true,
+    return new Promise((resolve, reject) => {
+      fetch('https://slack.com/api/channels.history?token='+token+'&channel='+channelId)
+        .then((response) => response.text())
+
+        .then((responseText) => {
+          var values = JSON.parse(responseText);
+          var messages = messages || [];
+          values.messages.forEach((message) => {
+            // console.log(message.text);
+            messages.push(message.text);
+          })
+          this.setState({
+            history: messages
+          });
+        })
+
+        .catch((error) => {
+          console.warn(error);
+        })
+        .done(() => {
+          resolve();
         });
-      })
-      .catch((error) => {
-        console.warn(error);
-      })
-      .done();
+    });
   },
 
   render: function() {
-    console.log("-----------")
-    console.log(this)
-    if (!this.state.channels) {
+    if (!this.state.history) {
       return null;
     }
     return (
       <View>
-        {this.state.channels.map(function(elm, i){
+        {this.state.history.map(function(elm, i){
           return (
             <Text>
               {elm}
