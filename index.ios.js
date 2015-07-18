@@ -5,7 +5,7 @@
 'use strict';
 
 var React = require('react-native');
-var SlackViewer = require('./components/SlackViewer.react');
+var SlackViewer = require('./app/scripts/components/SlackViewer.react');
 
 var {
   AppRegistry,

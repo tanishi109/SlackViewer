@@ -1,5 +1,8 @@
 var React = require('react-native');
-var token = "xoxp-2435567268-2435567274-6653820643-5ee449";
+
+var secrets = require('../../config/secrets.json');
+
+var slackToken = secrets.token.slack;
 
 var {
   Text,
@@ -24,7 +27,7 @@ var SlackViewer = React.createClass({
 
   fetchChannels: function() {
     return new Promise((resolve, reject) => {
-      fetch('https://slack.com/api/channels.list?token='+token)
+      fetch('https://slack.com/api/channels.list?token='+slackToken)
         .then((response) => response.text())
 
         .then((responseText) => {
@@ -62,7 +65,7 @@ var SlackViewer = React.createClass({
 
   _fetchHistory: function(channelId) {
     return new Promise((resolve, reject) => {
-      fetch('https://slack.com/api/channels.history?token='+token+'&channel='+channelId)
+      fetch('https://slack.com/api/channels.history?token='+slackToken+'&channel='+channelId)
         .then((response) => response.text())
 
         .then((responseText) => {
