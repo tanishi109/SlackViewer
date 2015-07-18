@@ -16,16 +16,7 @@ var SlackViewer = React.createClass({
 
   componentDidMount: function() {
     this.fetchChannels()
-      .then(() => {
-        return new Promise((resolve, reject) => {
-          var historyPromises = this.state.channels.map(this.fetchHistory);
-          console.log(historyPromises);
-          Promise.all(historyPromises)
-            .done(() => {
-              resolve();
-            })
-        });
-      })
+      .then(this.fetchAllChannelsHistory)
       .then(() => {
         console.log("then 2 !!", this);
       })
@@ -57,16 +48,27 @@ var SlackViewer = React.createClass({
     });
   },
 
-  fetchHistory: function(channelId) {
+  // state.channelsからHistoriesを取得
+  fetchAllChannelsHistory: function() {
+    return new Promise((resolve, reject) => {
+      var historyPromises = this.state.channels.map(this._fetchHistory);
+      console.log(historyPromises);
+      Promise.all(historyPromises)
+        .done(() => {
+          resolve();
+        })
+    });
+  },
+
+  _fetchHistory: function(channelId) {
     return new Promise((resolve, reject) => {
       fetch('https://slack.com/api/channels.history?token='+token+'&channel='+channelId)
         .then((response) => response.text())
 
         .then((responseText) => {
           var values = JSON.parse(responseText);
-          var messages = messages || [];
+          var messages = this.state.history || [];
           values.messages.forEach((message) => {
-            // console.log(message.text);
             messages.push(message.text);
           })
           this.setState({
