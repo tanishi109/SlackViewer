@@ -97,10 +97,13 @@ var Timeline = React.createClass({
     if (!this.state.history) {
       return null;
     }
+
+    var ds = new ListView.DataSource({rowHasChanged: (r1, r2) => r1 !== r2});
+
     return (
       <View>
         <ListView
-            dataSource={this.state.history}
+            dataSource={ds.cloneWithRows(this.state.history)}
             renderRow={ (rowData) =>
               <Post message={rowData}/>
             }
