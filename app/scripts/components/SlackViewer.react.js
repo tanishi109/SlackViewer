@@ -16,6 +16,7 @@ var SlackViewer = React.createClass({
   },
 
   render: function() {
+    console.log("SlackViewer Render!")
     return (
       <View>
         <Timeline/>

@@ -24,7 +24,7 @@ var Timeline = React.createClass({
     this.fetchChannels()
       .then(this.fetchAllChannelsHistory)
       .then(() => {
-        console.log("then 2 !!", this);
+        console.log("END: fetchHistory !!");
       })
   },
 
@@ -37,7 +37,10 @@ var Timeline = React.createClass({
           var values = JSON.parse(responseText);
           var channelIds = [];
           values.channels.forEach((channel) => {
-            channelIds.push(channel.id);
+            channelIds.push({
+              id: channel.id,
+              name: channel.name
+            });
           });
           this.setState({
             channels: channelIds,
@@ -58,7 +61,6 @@ var Timeline = React.createClass({
   fetchAllChannelsHistory: function() {
     return new Promise((resolve, reject) => {
       var historyPromises = this.state.channels.map(this._fetchHistory);
-      console.log(historyPromises);
       Promise.all(historyPromises)
         .done(() => {
           resolve();
@@ -66,16 +68,31 @@ var Timeline = React.createClass({
     });
   },
 
-  _fetchHistory: function(channelId) {
+  // RegexでhitしたChannel名のみのHistoriesを取得
+  fetchMatchedChannelsHistory: function() {
     return new Promise((resolve, reject) => {
-      fetch('https://slack.com/api/channels.history?token='+slackToken+'&channel='+channelId)
+      this.state.channels.forEach((channel) => {
+
+      });
+      var historyPromises = this.state.channels.map(this._fetchHistory);
+      Promise.all(historyPromises)
+        .done(() => {
+          resolve();
+        })
+    });
+  },
+
+  _fetchHistory: function(channel) {
+    return new Promise((resolve, reject) => {
+      fetch('https://slack.com/api/channels.history?token='+slackToken+'&channel='+channel.id+'&count=1')
         .then((response) => response.text())
 
         .then((responseText) => {
           var values = JSON.parse(responseText);
           var messages = this.state.history || [];
           values.messages.forEach((message) => {
-            messages.push(message.text);
+            message.channel = channel;
+            messages.push(message);
           })
           this.setState({
             history: messages
@@ -93,10 +110,17 @@ var Timeline = React.createClass({
 
   render: function() {
     console.log("-------")
-    console.log(this.state)
+    console.log(this.state.history)
     if (!this.state.history) {
       return null;
     }
+
+    // this.state.history = []
+    // i=100;
+    // while(i){
+    //   this.state.history.push(i);
+    //   i -= 1;
+    // }
 
     var ds = new ListView.DataSource({rowHasChanged: (r1, r2) => r1 !== r2});
 

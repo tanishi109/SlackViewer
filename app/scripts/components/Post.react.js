@@ -11,8 +11,9 @@ var Post = React.createClass({
     return (
       <View>
         <Text>
-          {this.props.message}
+          {this.props.message.channel.name}
         </Text>
+
       </View>
     );
   }
