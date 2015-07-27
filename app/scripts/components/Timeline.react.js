@@ -22,7 +22,7 @@ var Timeline = React.createClass({
 
   componentDidMount: function() {
     this.fetchChannels()
-      .then(this.fetchAllChannelsHistory)
+      .then(this.fetchMatchedChannelsHistory)
       .then(() => {
         console.log("END: fetchHistory !!");
       })
@@ -71,10 +71,13 @@ var Timeline = React.createClass({
   // RegexでhitしたChannel名のみのHistoriesを取得
   fetchMatchedChannelsHistory: function() {
     return new Promise((resolve, reject) => {
-      this.state.channels.forEach((channel) => {
-
+      var re = /h/
+      var matchedChannels = this.state.channels.filter((channel) => {
+        if (re.test(channel.name)) {
+          return channel;
+        }
       });
-      var historyPromises = this.state.channels.map(this._fetchHistory);
+      var historyPromises = matchedChannels.map(this._fetchHistory);
       Promise.all(historyPromises)
         .done(() => {
           resolve();
