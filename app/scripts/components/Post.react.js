@@ -13,7 +13,9 @@ var Post = React.createClass({
         <Text>
           {this.props.message.channel.name}
         </Text>
-
+        <Text>
+          {this.props.message.text}
+        </Text>
       </View>
     );
   }

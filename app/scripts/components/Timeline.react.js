@@ -25,6 +25,7 @@ var Timeline = React.createClass({
       .then(this.fetchMatchedChannelsHistory)
       .then(() => {
         console.log("END: fetchHistory !!");
+        this._descMessagesByNewness();
       })
   },
 
@@ -87,7 +88,7 @@ var Timeline = React.createClass({
 
   _fetchHistory: function(channel) {
     return new Promise((resolve, reject) => {
-      fetch('https://slack.com/api/channels.history?token='+slackToken+'&channel='+channel.id+'&count=1')
+      fetch('https://slack.com/api/channels.history?token='+slackToken+'&channel='+channel.id+'&count=3')
         .then((response) => response.text())
 
         .then((responseText) => {
@@ -108,6 +109,12 @@ var Timeline = React.createClass({
         .done(() => {
           resolve();
         });
+    });
+  },
+
+  _descMessagesByNewness: function () {
+    this.state.history.sort(function (messageA, messageB) {
+      return +messageA.ts - +messageB.ts;
     });
   },
 
