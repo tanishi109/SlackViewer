@@ -4,6 +4,7 @@ var Post = require('./Post.react');
 
 var secrets = require('../../config/secrets.json');
 var slackToken = secrets.token.slack;
+var channelNameRegExp = new RegExp(secrets.channelNameRegExpString);
 
 var {
   Text,
@@ -21,6 +22,8 @@ var Timeline = React.createClass({
   },
 
   componentDidMount: function() {
+    console.log("re");
+    console.log(channelNameRegExp);
     this.fetchChannels()
       .then(this.fetchMatchedChannelsHistory)
       .then(() => {
@@ -72,9 +75,8 @@ var Timeline = React.createClass({
   // RegexでhitしたChannel名のみのHistoriesを取得
   fetchMatchedChannelsHistory: function() {
     return new Promise((resolve, reject) => {
-      var re = /h/
       var matchedChannels = this.state.channels.filter((channel) => {
-        if (re.test(channel.name)) {
+        if (channelNameRegExp.test(channel.name)) {
           return channel;
         }
       });
@@ -88,7 +90,7 @@ var Timeline = React.createClass({
 
   _fetchHistory: function(channel) {
     return new Promise((resolve, reject) => {
-      fetch('https://slack.com/api/channels.history?token='+slackToken+'&channel='+channel.id+'&count=3')
+      fetch('https://slack.com/api/channels.history?token='+slackToken+'&channel='+channel.id+'&count=1')
         .then((response) => response.text())
 
         .then((responseText) => {
