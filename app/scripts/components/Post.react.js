@@ -9,7 +9,7 @@ var {
 var Post = React.createClass({
   render: function() {
     return (
-      <View>
+      <View style={styles.container}>
         <Text>
           {this.props.message.channel.name}
         </Text>
@@ -18,6 +18,19 @@ var Post = React.createClass({
         </Text>
       </View>
     );
+  }
+});
+
+var styles = StyleSheet.create({
+  container: {
+    paddingTop: 20,
+    marginTop: 20,
+    height: 300,
+    flex: 1,
+    flexDirection: 'row',
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: '#F5FCFF',
   }
 });
 

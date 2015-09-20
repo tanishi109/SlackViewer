@@ -4,12 +4,11 @@ var Post = require('./Post.react');
 
 var secrets = require('../../config/secrets.json');
 var slackToken = secrets.token.slack;
-var channelNameRegExp = new RegExp(secrets.channelNameRegExpString);
 
 var {
   Text,
   View,
-  ListView,
+  ScrollView,
   StyleSheet,
 } = React;
 
@@ -22,10 +21,8 @@ var Timeline = React.createClass({
   },
 
   componentDidMount: function() {
-    console.log("re");
-    console.log(channelNameRegExp);
     this.fetchChannels()
-      .then(this.fetchMatchedChannelsHistory)
+      .then(this.fetchAllChannelsHistory)
       .then(() => {
         console.log("END: fetchHistory !!");
         this._descMessagesByNewness();
@@ -72,25 +69,9 @@ var Timeline = React.createClass({
     });
   },
 
-  // RegexでhitしたChannel名のみのHistoriesを取得
-  fetchMatchedChannelsHistory: function() {
-    return new Promise((resolve, reject) => {
-      var matchedChannels = this.state.channels.filter((channel) => {
-        if (channelNameRegExp.test(channel.name)) {
-          return channel;
-        }
-      });
-      var historyPromises = matchedChannels.map(this._fetchHistory);
-      Promise.all(historyPromises)
-        .done(() => {
-          resolve();
-        })
-    });
-  },
-
   _fetchHistory: function(channel) {
     return new Promise((resolve, reject) => {
-      fetch('https://slack.com/api/channels.history?token='+slackToken+'&channel='+channel.id+'&count=1')
+      fetch('https://slack.com/api/channels.history?token='+slackToken+'&channel='+channel.id+'&count=5')
         .then((response) => response.text())
 
         .then((responseText) => {
@@ -127,27 +108,31 @@ var Timeline = React.createClass({
       return null;
     }
 
-    // this.state.history = []
-    // i=100;
-    // while(i){
-    //   this.state.history.push(i);
-    //   i -= 1;
-    // }
-
-    var ds = new ListView.DataSource({rowHasChanged: (r1, r2) => r1 !== r2});
-
     return (
       <View>
-        <ListView
-            dataSource={ds.cloneWithRows(this.state.history)}
-            renderRow={ (rowData) =>
-              <Post message={rowData}/>
-            }
-        />
+        <ScrollView
+            onScroll={() => { console.log('onScroll!'); }}
+            style={styles.listView}
+        >
+        {
+          this.state.history.map(function (hist) {
+            return <Post message={hist}/>
+          })
+        }
+        </ScrollView>
       </View>
     );
   }
 
+});
+
+var styles = StyleSheet.create({
+  listView: {
+    paddingTop: 20,
+    marginTop: 20,
+    height: 300,
+    backgroundColor: '#F5FCFF'
+  }
 });
 
 module.exports = Timeline;
