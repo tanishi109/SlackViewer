@@ -1,1 +1,5 @@
 # SlackViewer
+
+```
+$ npm install
+```
