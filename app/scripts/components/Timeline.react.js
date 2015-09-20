@@ -96,7 +96,7 @@ var Timeline = React.createClass({
   },
 
   _descMessagesByNewness: function () {
-    this.state.history.sort(function (messageA, messageB) {
+    this.state.history = this.state.history.sort(function (messageA, messageB) {
       return +messageA.ts - +messageB.ts;
     });
   },
@@ -111,11 +111,10 @@ var Timeline = React.createClass({
     return (
       <View>
         <ScrollView
-            onScroll={() => { console.log('onScroll!'); }}
             style={styles.listView}
         >
         {
-          this.state.history.map(function (hist) {
+          this.state.history.map(function (hist, i) {
             return <Post message={hist}/>
           })
         }
@@ -126,11 +125,14 @@ var Timeline = React.createClass({
 
 });
 
+var Dimensions = require('Dimensions');
+var { width, height } = Dimensions.get('window');
+
 var styles = StyleSheet.create({
   listView: {
-    paddingTop: 20,
-    marginTop: 20,
-    height: 300,
+    paddingTop: 32,
+    width: width,
+    height: height,
     backgroundColor: '#F5FCFF'
   }
 });
