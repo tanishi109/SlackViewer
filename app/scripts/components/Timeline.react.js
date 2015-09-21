@@ -1,6 +1,6 @@
 var React = require('react-native');
 
-var Post = require('./Post.react');
+var ChannelTimeline = require('./ChannelTimeline.react');
 
 var secrets = require('../../config/secrets.json');
 var slackToken = secrets.token.slack;
@@ -16,16 +16,19 @@ var Timeline = React.createClass({
 
   getInitialState: function () {
     return {
-      channels: ["empty"],
+      channels: [],
+      channelMessagesMap: {}
     };
   },
 
   componentDidMount: function() {
     this.fetchChannels()
+      .then((channels) => { 
+        return this.fetchAllChannelsInfo(channels);
+      })
       .then(this.fetchAllChannelsHistory)
       .then(() => {
-        console.log("END: fetchHistory !!");
-        this._descMessagesByNewness();
+        // this._descMessagesByNewness();
       })
   },
 
@@ -33,22 +36,41 @@ var Timeline = React.createClass({
     return new Promise((resolve, reject) => {
       fetch('https://slack.com/api/channels.list?token='+slackToken)
         .then((response) => response.text())
-
         .then((responseText) => {
-          var values = JSON.parse(responseText);
-          var channelIds = [];
-          values.channels.forEach((channel) => {
-            channelIds.push({
-              id: channel.id,
-              name: channel.name
-            });
-          });
-          this.setState({
-            channels: channelIds,
-            loaded: true,
-          });
+          var channels = JSON.parse(responseText).channels;
+          return channels;
         })
+        .catch((error) => {
+          console.warn(error);
+        })
+        .done((channels) => {
+          resolve(channels);
+        });
+    });
+  },
 
+  fetchAllChannelsInfo: function(channels) {
+    return new Promise((resolve, reject) => {
+      var channelInfoPromises = channels.map(this._fetchChannelInfo);
+      Promise.all(channelInfoPromises)
+        .done(() => {
+          resolve();
+        })
+    });
+  },
+
+  _fetchChannelInfo: function(channel) {
+    return new Promise((resolve, reject) => {
+      fetch('https://slack.com/api/channels.info?token='+slackToken+'&channel='+channel.id)
+        .then((response) => response.text())
+        .then((responseText) => {
+          var fetchedChannel = JSON.parse(responseText).channel;
+          fetchedChannel.history = [];
+          this.state.channels.push(fetchedChannel);
+          this.setState({
+            channels: this.state.channels
+          })
+        })
         .catch((error) => {
           console.warn(error);
         })
@@ -75,15 +97,11 @@ var Timeline = React.createClass({
         .then((response) => response.text())
 
         .then((responseText) => {
-          var values = JSON.parse(responseText);
-          var messages = this.state.history || [];
-          values.messages.forEach((message) => {
-            message.channel = channel;
-            messages.push(message);
-          })
+          var messages = JSON.parse(responseText).messages;
+          this.state.channelMessagesMap[channel.id] = messages;
           this.setState({
-            history: messages
-          });
+            channelMessagesMap: this.state.channelMessagesMap
+          })
         })
 
         .catch((error) => {
@@ -102,20 +120,20 @@ var Timeline = React.createClass({
   },
 
   render: function() {
-    console.log("-------")
-    console.log(this.state.history)
-    if (!this.state.history) {
+    if (Object.keys(this.state.channelMessagesMap).length <= 0) {
       return null;
     }
-
     return (
       <View>
         <ScrollView
             style={styles.listView}
         >
         {
-          this.state.history.map(function (hist, i) {
-            return <Post message={hist}/>
+          this.state.channels.map( (channel, i) => {
+            return <ChannelTimeline
+              messages={this.state.channelMessagesMap[channel.id]}
+              channel={channel}
+            />
           })
         }
         </ScrollView>

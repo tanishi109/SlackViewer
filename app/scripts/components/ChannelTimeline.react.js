@@ -11,17 +11,25 @@ var userList = {
   U02DAV4GF: "tuuna"
 }
 
-var Post = React.createClass({
+var ChannelTimeline = React.createClass({
   render: function() {
+    if (!(this.props.channel && this.props.messages)) {
+      return null;
+    }
     return (
       <View style={styles.container}>
         <Text>
-          #{this.props.message.channel.name+" "}
-          - {userList[this.props.message.user]}
+          #{this.props.channel.name}
         </Text>
-        <Text>
-          {this.props.message.text}
-        </Text>
+        {
+          this.props.messages.map( (message, i) => {
+            return (
+              <Text>
+                {message.text}
+              </Text>
+            );
+          });
+        }
       </View>
     );
   }
@@ -38,4 +46,4 @@ var styles = StyleSheet.create({
   }
 });
 
-module.exports = Post;
+module.exports = ChannelTimeline;
