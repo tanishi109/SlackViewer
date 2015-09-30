@@ -28,7 +28,7 @@ var ChannelTimeline = React.createClass({
                 {message.text}
               </Text>
             );
-          });
+          })
         }
       </View>
     );
